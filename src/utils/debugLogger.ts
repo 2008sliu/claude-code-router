@@ -37,7 +37,7 @@ function truncateBase64(obj: any, maxLength = 100): any {
 }
 
 /**
- * Log debug information to /tmp/ccr_server.log
+ * Log debug information to /tmp/ccr_server.log in JSONL format
  */
 export function debugLog(topic: string, data: LogData = {}) {
   const timestamp = new Date().toISOString();
@@ -49,7 +49,8 @@ export function debugLog(topic: string, data: LogData = {}) {
     ...truncatedData
   };
 
-  const logLine = `\n${'='.repeat(80)}\n${JSON.stringify(logEntry, null, 2)}\n${'='.repeat(80)}\n`;
+  // JSONL format: one JSON object per line, no separators
+  const logLine = JSON.stringify(logEntry) + '\n';
 
   try {
     appendFileSync(LOG_FILE, logLine);
