@@ -42,3 +42,4 @@ This project is a TypeScript-based router for Claude Code requests. It allows ro
 -   **Dependencies**: The project is built with `esbuild`. It has a key local dependency `@musistudio/llms`, which probably contains the core logic for interacting with different LLM APIs.
 -   `@musistudio/llms` is implemented based on `fastify` and exposes `fastify`'s hook and middleware interfaces, allowing direct use of `server.addHook`.
 - 无论如何你都不能自动提交git
+- There is an vllm instance serving the qwen3-omni-30b model at port 8002. There is a repo for it at ~/github/qwen3. The Qwen3 official repo is cloned as a submodule at ~/github/vendor/Qwen3-Omni. The vllm repo is cloned to  ~/github/qwen3/vllm, but not as a submodule of ~/github/qwen3
