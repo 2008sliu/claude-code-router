@@ -54,19 +54,78 @@ export class ImageAgent implements IAgent {
     this.appendTools()
   }
 
+  // Helper: Check if tool_result contains JSON-embedded images
+  private hasToolResultWithImage(content: any[]): boolean {
+    return content.some((item: any) => {
+      if (item.type !== 'tool_result') return false;
+      if (!Array.isArray(item.content)) return false;
+
+      return item.content.some((element: any) => {
+        // Direct image
+        if (element.type === 'image') return true;
+
+        // JSON-embedded image (jupyter-mcp-server)
+        if (element.type === 'text' && typeof element.text === 'string') {
+          try {
+            const parsed = JSON.parse(element.text);
+            if (parsed.outputs && Array.isArray(parsed.outputs)) {
+              return parsed.outputs.some((output: any) =>
+                output.type === 'image' && output.data
+              );
+            }
+          } catch (e) {
+            // Not JSON
+          }
+        }
+        return false;
+      });
+    });
+  }
+
   shouldHandle(req: any, config: any): boolean {
     if (!config.Router.image || req.body.model === config.Router.image) return false;
     const lastMessage = req.body.messages[req.body.messages.length - 1]
-    if (!config.forceUseImageAgent && lastMessage.role === 'user' && Array.isArray(lastMessage.content) && lastMessage.content.find((item: any) => item.type === 'image' || (Array.isArray(item?.content) && item.content.some((sub: any) => sub.type === 'image')))) {
+    if (!config.forceUseImageAgent && lastMessage.role === 'user' && Array.isArray(lastMessage.content) &&
+        (lastMessage.content.find((item: any) => item.type === 'image' || (Array.isArray(item?.content) && item.content.some((sub: any) => sub.type === 'image'))) ||
+         this.hasToolResultWithImage(lastMessage.content))) {
       req.body.model = config.Router.image
       const images = []
       lastMessage.content.filter((item: any) => item.type === 'tool_result').forEach((item: any) => {
-        item.content.forEach((element: any) => {
-          if (element.type === 'image') {
-            images.push(element);
-          }
-        })
-        item.content = 'read image successfully';
+        if (typeof item.content === 'string') {
+          item.content = 'read image successfully';
+        } else if (Array.isArray(item.content)) {
+          item.content.forEach((element: any) => {
+            // Direct Anthropic image format
+            if (element.type === 'image') {
+              images.push(element);
+            }
+            // JSON-embedded images (jupyter-mcp-server)
+            else if (element.type === 'text' && typeof element.text === 'string') {
+              try {
+                const parsed = JSON.parse(element.text);
+                // Check if this is a notebook cell output with images
+                if (parsed.outputs && Array.isArray(parsed.outputs)) {
+                  parsed.outputs.forEach((output: any) => {
+                    if (output.type === 'image' && output.data) {
+                      // Normalize to standard Anthropic format
+                      images.push({
+                        type: 'image',
+                        source: {
+                          type: 'base64',
+                          data: output.data,
+                          media_type: output.media_type || 'image/png'
+                        }
+                      });
+                    }
+                  });
+                }
+              } catch (e) {
+                // Not JSON or parsing failed, ignore
+              }
+            }
+          });
+          item.content = 'read image successfully';
+        }
       })
       lastMessage.content.push(...images);
       return false;
