@@ -54,3 +54,4 @@ This project is a TypeScript-based router for Claude Code requests. It allows ro
 - you should not use the `ccr` command, it may using another system-level installed ccr. You should explictily use `/home/helion/miniconda3/envs/ubuntu/bin/node ~/repos/zsh/external/github/claude-code-router/dist/cli.js`, or the `test.sh`, which hardcode to use this version of node
 - you use ./build.sh to build the node project, which uses the right version of node in the right directly.
 - There is a doc in ~/repos/zsh/docs/mcp/claude-code-router-image.md, which has some analysis on how does claude-code-router handles images. (It also contains some part related to jupyter-mcp server, which is not relevant here)
+- You can use ./test-no-image.sh to test without image
