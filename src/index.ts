@@ -22,6 +22,7 @@ import JSON5 from "json5";
 import { IAgent } from "./agents/type";
 import agentsManager from "./agents";
 import { EventEmitter } from "node:events";
+import { debugLog } from "./utils/debugLogger";
 
 const event = new EventEmitter()
 
@@ -159,6 +160,16 @@ async function run(options: RunOptions = {}) {
   });
   server.addHook("preHandler", async (req, reply) => {
     if (req.url.startsWith("/v1/messages")) {
+      // Log request received from client
+      debugLog('RECEIVED_FROM_CLIENT', {
+        url: req.url,
+        method: req.method,
+        model: req.body?.model,
+        messages: req.body?.messages,
+        tools: req.body?.tools?.map((t: any) => t.name),
+        system: req.body?.system,
+      });
+
       const useAgents = []
 
       for (const agent of agentsManager.getAllAgents()) {
@@ -192,6 +203,15 @@ async function run(options: RunOptions = {}) {
         config,
         event
       });
+
+      // Log after agent processing and routing
+      debugLog('AFTER_AGENT_PROCESSING', {
+        selectedModel: req.body?.model,
+        agents: useAgents,
+        messages: req.body?.messages,
+        tools: req.body?.tools?.map((t: any) => t.name),
+        system: req.body?.system,
+      });
     }
   });
   server.addHook("onError", async (request, reply, error) => {
@@ -199,6 +219,21 @@ async function run(options: RunOptions = {}) {
   })
   server.addHook("onSend", (req, reply, payload, done) => {
     if (req.sessionId && req.url.startsWith("/v1/messages")) {
+      // Log response from model API
+      if (payload instanceof ReadableStream) {
+        debugLog('RECEIVED_FROM_MODEL_API', {
+          type: 'stream',
+          model: req.body?.model,
+          hasAgents: !!req.agents,
+        });
+      } else {
+        debugLog('RECEIVED_FROM_MODEL_API', {
+          type: 'non-stream',
+          model: req.body?.model,
+          payload: payload,
+        });
+      }
+
       if (payload instanceof ReadableStream) {
         if (req.agents) {
           const abortController = new AbortController();
