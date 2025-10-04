@@ -11,7 +11,16 @@ interface LogData {
  */
 function truncateBase64(obj: any, maxLength = 100): any {
   if (typeof obj === 'string' && obj.length > maxLength * 2) {
-    // Check if it looks like base64
+    // Check if it's a data URL (e.g., data:image/png;base64,...)
+    const dataUrlMatch = obj.match(/^(data:image\/[^;]+;base64,)(.+)$/);
+    if (dataUrlMatch) {
+      const header = dataUrlMatch[1];
+      const base64Data = dataUrlMatch[2];
+      if (base64Data.length > maxLength * 2) {
+        return `${header}${base64Data.substring(0, maxLength)}...[${base64Data.length - maxLength * 2} chars]...${base64Data.substring(base64Data.length - maxLength)}`;
+      }
+    }
+    // Check if it looks like pure base64
     if (/^[A-Za-z0-9+/=]+$/.test(obj.substring(0, 100))) {
       return `${obj.substring(0, maxLength)}...[${obj.length - maxLength * 2} chars]...${obj.substring(obj.length - maxLength)}`;
     }
