@@ -18,4 +18,4 @@ jq '{
     model: .model // .selectedModel // .body.model // null,
     system: .system // .body.system // null,
     messages: .messages // .body.messages // null
-}' "$LOG_FILE" |sed 's/iVBORw0KGgoAAAANSUhEUgAAA9[^"]*"/====[IMAGE]=========\\"/' | sed 's#You are an interactive CLI tool.*/example>#You are an interactive=======/example>#'
+}' "$LOG_FILE" | sed 's/iVBORw0KGgoAAAANSUhEUgAAA9[^"]*U0FgAAAABJRU5ErkJggg/====[IMAGE]====/' | sed 's#You are an interactive CLI tool.*/example>#You are an interactive=======/example>#'
