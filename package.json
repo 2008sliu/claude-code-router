@@ -20,7 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "@fastify/static": "^8.2.0",
-    "@musistudio/llms": "^1.0.35",
+    "@musistudio/llms": "file:./llms",
     "dotenv": "^16.4.7",
     "find-process": "^2.0.0",
     "json5": "^2.2.3",
