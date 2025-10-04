@@ -204,9 +204,9 @@ async function run(options: RunOptions = {}) {
         event
       });
 
-      // Log after agent processing and routing (this is what will be sent to transformers)
+      // Log after agent processing and routing (this is what will be sent to @musistudio/llms)
       // Transformers are applied by @musistudio/llms after this point
-      debugLog('SENDING_TO_MODEL_API', {
+      debugLog('SENDING_TO_LLMS', {
         selectedModel: req.body?.model,
         agents: useAgents,
         messages: req.body?.messages,
