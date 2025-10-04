@@ -26,21 +26,6 @@ import { debugLog } from "./utils/debugLogger";
 
 const event = new EventEmitter()
 
-// Listen for events to log what's sent to model API
-event.on('beforeRequest', (req: any) => {
-  if (req.url?.startsWith("/v1/messages")) {
-    debugLog('SENDING_TO_MODEL_API', {
-      url: req.url,
-      model: req.body?.model,
-      messages: req.body?.messages,
-      tools: req.body?.tools?.map((t: any) => t.name),
-      system: req.body?.system,
-      max_tokens: req.body?.max_tokens,
-      stream: req.body?.stream,
-    });
-  }
-});
-
 async function initializeClaudeConfig() {
   const homeDir = homedir();
   const configPath = join(homeDir, ".claude.json");
@@ -219,17 +204,17 @@ async function run(options: RunOptions = {}) {
         event
       });
 
-      // Log after agent processing and routing (before transformers)
-      debugLog('AFTER_AGENT_PROCESSING', {
+      // Log after agent processing and routing (this is what will be sent to transformers)
+      // Transformers are applied by @musistudio/llms after this point
+      debugLog('SENDING_TO_MODEL_API', {
         selectedModel: req.body?.model,
         agents: useAgents,
         messages: req.body?.messages,
         tools: req.body?.tools?.map((t: any) => t.name),
         system: req.body?.system,
+        max_tokens: req.body?.max_tokens,
+        stream: req.body?.stream,
       });
-
-      // Note: After this point, transformers will be applied by @musistudio/llms
-      // We'll log what's actually sent in the event listener above
     }
   });
   server.addHook("onError", async (request, reply, error) => {
