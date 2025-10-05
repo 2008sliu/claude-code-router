@@ -1,6 +1,9 @@
 import {IAgent, ITool} from "./type";
 import { createHash } from 'crypto';
 import { LRUCache } from 'lru-cache';
+import { mkdirSync, writeFileSync, existsSync } from 'fs';
+import { join } from 'path';
+import { homedir } from 'os';
 
 interface ImageCacheEntry {
   source: any;
@@ -44,6 +47,33 @@ class ImageCache {
 }
 
 const imageCache = new ImageCache();
+
+// Helper function to save base64 image to file and return file:// URL
+function saveImageToFile(base64Data: string, mediaType: string): string {
+  // Create .jupyter/images directory
+  const imageDir = join(homedir(), '.jupyter', 'images');
+  if (!existsSync(imageDir)) {
+    mkdirSync(imageDir, { recursive: true });
+  }
+
+  // Calculate MD5 hash of image data
+  const hash = createHash('md5').update(base64Data).digest('hex');
+
+  // Determine file extension from media type
+  const ext = mediaType?.split('/')[1] || 'png';
+  const filename = `${hash}.${ext}`;
+  const filepath = join(imageDir, filename);
+
+  // Save image if not already exists
+  if (!existsSync(filepath)) {
+    // Convert base64 to buffer and write to file
+    const buffer = Buffer.from(base64Data, 'base64');
+    writeFileSync(filepath, buffer);
+  }
+
+  // Return file:// URL with absolute path
+  return `file://${filepath}`;
+}
 
 export class ImageAgent implements IAgent {
   name = "image";
@@ -97,7 +127,21 @@ export class ImageAgent implements IAgent {
           item.content.forEach((element: any) => {
             // Direct Anthropic image format
             if (element.type === 'image') {
-              images.push(element);
+              // Convert base64 to file:// URL if using base64
+              if (element.source?.type === 'base64' && element.source?.data) {
+                const fileUrl = saveImageToFile(element.source.data, element.source.media_type || 'image/png');
+                images.push({
+                  type: 'image',
+                  source: {
+                    type: 'url',
+                    url: fileUrl,
+                    media_type: element.source.media_type
+                  }
+                });
+              } else {
+                // Already URL format, keep as-is
+                images.push(element);
+              }
             }
             // JSON-embedded images (jupyter-mcp-server)
             else if (element.type === 'text' && typeof element.text === 'string') {
@@ -107,12 +151,15 @@ export class ImageAgent implements IAgent {
                 if (parsed.outputs && Array.isArray(parsed.outputs)) {
                   parsed.outputs.forEach((output: any) => {
                     if (output.type === 'image' && output.data) {
-                      // Normalize to standard Anthropic format
+                      // Save to file and get file:// URL
+                      const fileUrl = saveImageToFile(output.data, output.media_type || 'image/png');
+
+                      // Normalize to standard Anthropic format with file:// URL
                       images.push({
                         type: 'image',
                         source: {
-                          type: 'base64',
-                          data: output.data,
+                          type: 'url',
+                          url: fileUrl,
                           media_type: output.media_type || 'image/png'
                         }
                       });
