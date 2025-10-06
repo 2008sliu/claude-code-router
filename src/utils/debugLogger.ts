@@ -1,6 +1,6 @@
 import { appendFileSync } from 'fs';
 
-const LOG_FILE = '/tmp/ccr_server.log';
+const LOG_FILE = process.env.HOME + '/tmp/ccr_server.log';
 
 interface LogData {
   [key: string]: any;
@@ -46,7 +46,7 @@ function truncateBase64(obj: any, maxLength = 100): any {
 }
 
 /**
- * Log debug information to /tmp/ccr_server.log in JSONL format
+ * Log debug information to ~/tmp/ccr_server.log in JSONL format
  */
 export function debugLog(topic: string, data: LogData = {}) {
   const timestamp = new Date().toISOString();

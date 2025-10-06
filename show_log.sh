@@ -2,9 +2,9 @@
 
 # Parse ccr_server.log and produce simplified JSONL output
 # Usage: ./show_log.sh [log_file]
-# Default log file: /tmp/ccr_server.log
+# Default log file: ~/tmp/ccr_server.log
 
-LOG_FILE="${1:-/tmp/ccr_server.log}"
+LOG_FILE="${1:-~/tmp/ccr_server.log}"
 
 if [ ! -f "$LOG_FILE" ]; then
     echo "Error: Log file not found: $LOG_FILE" >&2

@@ -55,3 +55,16 @@ This project is a TypeScript-based router for Claude Code requests. It allows ro
 - you use ./build.sh to build the node project, which uses the right version of node in the right directly.
 - There is a doc in ~/repos/zsh/docs/mcp/claude-code-router-image.md, which has some analysis on how does claude-code-router handles images. (It also contains some part related to jupyter-mcp server, which is not relevant here)
 - You can use ./test-no-image.sh to test without image
+- Now the image handling in claude-code-router -> llms -> vllm -> LLM is ok now, even if we have base64 image data in the message. Next we are going to investigate why the image in the tool_result cannot be processed correctly. I started claude-code-router which has an jupyter mcp server runnning. The server is configured as
+        "jupyter-mcp": {
+          "type": "stdio",
+          "command": "/home/helion/bin/mcp/jupyter-mcp",
+          "args": [
+            "--log",
+            "/tmp/jupyter-mcp.log"
+          ],
+          "env": {}
+        }
+
+It reads the env file in ~/repos/zsh/external/jupyter-mcp-server/.jupyter/mcp.env, which attaches to the mcp.ipynb notebook. It has ALLOW_IMAGE_OUTPUT=true
+- I moved the llm submodule to llms, the previous llm dir is wrong
