@@ -13,5 +13,5 @@ export MY_CCR_NAME=${model_name}
 
 echo "CCR_SERVER=$CCR_SERVER MODEL=${model_name}"
 
-/home/helion/miniconda3/envs/ubuntu/bin/node ~/repos/zsh/external/github/claude-code-router/dist/cli.js stop || true
-/home/helion/miniconda3/envs/ubuntu/bin/node ~/repos/zsh/external/github/claude-code-router/dist/cli.js code "$@"
+~/miniconda3/envs/ubuntu/bin/node ~/repos/zsh/external/github/claude-code-router/dist/cli.js stop || true
+~/miniconda3/envs/ubuntu/bin/node ~/repos/zsh/external/github/claude-code-router/dist/cli.js code "$@"

@@ -51,14 +51,14 @@ This project is a TypeScript-based router for Claude Code requests. It allows ro
 - There is `~/github/qwen3/test2.sh` which demonstrates how to communicate with the omni model served by vllm. The client, like claude-code-router, should form requests like this.
 
 ### claude-code-router (ccr) testing using source code
-- you should not use the `ccr` command, it may using another system-level installed ccr. You should explictily use `/home/helion/miniconda3/envs/ubuntu/bin/node ~/repos/zsh/external/github/claude-code-router/dist/cli.js`, or the `test.sh`, which hardcode to use this version of node
+- you should not use the `ccr` command, it may using another system-level installed ccr. You should explictily use `~/miniconda3/envs/ubuntu/bin/node ~/repos/zsh/external/github/claude-code-router/dist/cli.js`, or the `test.sh`, which hardcode to use this version of node
 - you use ./build.sh to build the node project, which uses the right version of node in the right directly.
 - There is a doc in ~/repos/zsh/docs/mcp/claude-code-router-image.md, which has some analysis on how does claude-code-router handles images. (It also contains some part related to jupyter-mcp server, which is not relevant here)
 - You can use ./test-no-image.sh to test without image
 - Now the image handling in claude-code-router -> llms -> vllm -> LLM is ok now, even if we have base64 image data in the message. Next we are going to investigate why the image in the tool_result cannot be processed correctly. I started claude-code-router which has an jupyter mcp server runnning. The server is configured as
         "jupyter-mcp": {
           "type": "stdio",
-          "command": "/home/helion/bin/mcp/jupyter-mcp",
+          "command": "~/bin/mcp/jupyter-mcp",
           "args": [
             "--log",
             "/tmp/jupyter-mcp.log"
