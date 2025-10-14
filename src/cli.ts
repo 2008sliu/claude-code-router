@@ -10,7 +10,7 @@ import {
 } from "./utils/processCheck";
 import { runModelSelector } from "./utils/modelSelector"; // ADD THIS LINE
 import { version } from "../package.json";
-import { spawn, exec } from "child_process";
+import { spawn, execFile } from "child_process";
 import { PID_FILE, REFERENCE_COUNT_FILE } from "./constants";
 import fs, { existsSync, readFileSync } from "fs";
 import { join } from "path";
@@ -256,23 +256,27 @@ async function main() {
 
       // Open URL in browser based on platform
       const platform = process.platform;
-      let openCommand = "";
+      let command = "";
+      let args: string[] = [];
 
       if (platform === "win32") {
         // Windows
-        openCommand = `start ${uiUrl}`;
+        command = "cmd";
+        args = ["/c", "start", uiUrl];
       } else if (platform === "darwin") {
         // macOS
-        openCommand = `open ${uiUrl}`;
+        command = "open";
+        args = [uiUrl];
       } else if (platform === "linux") {
         // Linux
-        openCommand = `xdg-open ${uiUrl}`;
+        command = "xdg-open";
+        args = [uiUrl];
       } else {
         console.error("Unsupported platform for opening browser");
         process.exit(1);
       }
 
-      exec(openCommand, (error) => {
+      execFile(command, args, (error) => {
         if (error) {
           console.error("Failed to open browser:", error.message);
           process.exit(1);

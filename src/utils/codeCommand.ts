@@ -63,24 +63,31 @@ export async function executeCodeCommand(args: string[] = []) {
 
   const argsObj = minimist(args)
   const argsArr = []
+  // Add positional arguments first
+  if (argsObj._ && argsObj._.length > 0) {
+    argsArr.push(...argsObj._.map(String))
+  }
+  // Add flag arguments
   for (const [argsObjKey, argsObjValue] of Object.entries(argsObj)) {
-    if (argsObjKey !== '_' && argsObj[argsObjKey]) {
+    if (argsObjKey !== '_') {
       const prefix = argsObjKey.length === 1 ? '-' : '--';
       // For boolean flags, don't append the value
       if (argsObjValue === true) {
         argsArr.push(`${prefix}${argsObjKey}`);
       } else {
-        argsArr.push(`${prefix}${argsObjKey} ${JSON.stringify(argsObjValue)}`);
+        argsArr.push(`${prefix}${argsObjKey}`, String(argsObjValue));
       }
     }
   }
+  // Add settings flag at the end
+  argsArr.push('--settings', JSON.stringify(settingsFlag));
+
   const claudeProcess = spawn(
     claudePath,
     argsArr,
     {
       env: process.env,
       stdio: stdioConfig,
-      shell: true,
     }
   );
 
